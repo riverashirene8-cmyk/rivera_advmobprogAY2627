@@ -2,158 +2,132 @@ import 'package:flutter/material.dart';
 
 import 'settings_screen.dart';
 
-
-/// CounterScreen demonstrates Ephemeral State.
-/// The counter value only belongs to this widget.
 class CounterScreen extends StatefulWidget {
-
   const CounterScreen({super.key});
 
-
   @override
-  State<CounterScreen> createState() =>
-      _CounterScreenState();
-
+  State<CounterScreen> createState() => _CounterScreenState();
 }
 
-
-/// State class that manages the counter value.
 class _CounterScreenState extends State<CounterScreen> {
-
-
-  // Local state variable.
   int counter = 0;
 
-
-
-  /// Adds one to the counter value.
   void increaseCounter() {
-
     setState(() {
-
       counter++;
-
     });
 
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Counter increased to $counter"),
+        duration: const Duration(milliseconds: 700),
+      ),
+    );
   }
 
+  void resetCounter() {
+    setState(() {
+      counter = 0;
+    });
 
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Counter has been reset."),
+        duration: Duration(milliseconds: 700),
+      ),
+    );
+  }
 
-  /// Builds the counter screen interface.
+  Color getCounterColor() {
+    if (counter >= 20) {
+      return Colors.red;
+    } else if (counter >= 10) {
+      return Colors.green;
+    } else {
+      return Colors.blue;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
-
-
       appBar: AppBar(
-
-        title: const Text(
-          "Counter - Ephemeral State",
+        title: Text(
+          "Counter ($counter)",
         ),
-
 
         actions: [
-
-
-          // Opens the theme settings screen.
           IconButton(
-
-            icon: const Icon(
-              Icons.settings,
-            ),
-
-
+            icon: const Icon(Icons.settings),
             onPressed: () {
-
-
               Navigator.push(
-
                 context,
-
                 MaterialPageRoute(
-
-                  builder: (context) =>
-                      const SettingsScreen(),
-
+                  builder: (_) => const SettingsScreen(),
                 ),
-
               );
-
-
             },
-
           ),
-
-
         ],
-
       ),
-
-
 
       body: Center(
-
         child: Column(
-
-          mainAxisAlignment:
-              MainAxisAlignment.center,
-
-
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
-
             const Text(
-
               "Counter Value",
-
               style: TextStyle(
-
                 fontSize: 22,
-
               ),
-
             ),
 
-
+            const SizedBox(height: 20),
 
             Text(
-
               "$counter",
-
-              style: const TextStyle(
-
-                fontSize: 50,
-
+              style: TextStyle(
+                fontSize: 60,
                 fontWeight: FontWeight.bold,
-
+                color: getCounterColor(),
               ),
-
             ),
 
+            const SizedBox(height: 20),
 
+            Text(
+              counter >= 20
+                  ? "Excellent!"
+                  : counter >= 10
+                      ? "Great!"
+                      : "Keep Going!",
+              style: const TextStyle(
+                fontSize: 18,
+              ),
+            ),
           ],
-
         ),
-
       ),
 
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            heroTag: "add",
+            onPressed: increaseCounter,
+            child: const Icon(Icons.add),
+          ),
 
+          const SizedBox(height: 12),
 
-      floatingActionButton: FloatingActionButton(
-
-        onPressed: increaseCounter,
-
-        child: const Icon(
-          Icons.add,
-        ),
-
+          FloatingActionButton(
+            heroTag: "reset",
+            backgroundColor: Colors.red,
+            onPressed: counter == 0 ? null : resetCounter,
+            child: const Icon(Icons.refresh),
+          ),
+        ],
       ),
-
-
     );
-
   }
-
 }
