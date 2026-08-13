@@ -1,62 +1,57 @@
+// packages
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import 'models/theme_provider.dart';
-import 'screens/counter_screen.dart';
+// screens
+import 'screens/home_screen.dart';
+import 'screens/settings_screen.dart';
 
-// Main function that starts the Flutter application.
-void main() {
-  runApp(
-    // Provides ThemeProvider to the entire application.
-    // This allows different screens to access the same theme state.
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
-      child: const MyApp(),
-    ),
-  );
+// providers
+import 'providers/theme_provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+ SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then
+((   
+
+      _,
+) async {
+  await dotenv.load(fileName: 'assets/.env');
+  runApp(const RiveraAdvMobProg());
+});
 }
+class RiveraAdvMobProg extends StatelessWidget {
+  const RiveraAdvMobProg({super.key});
 
-// MyApp is the root widget of the application.
-// It contains the main app configuration and themes.
-class MyApp extends StatelessWidget {
-  // Constructor for MyApp.
-  const MyApp({super.key});
-
-  // Builds the main application interface.
   @override
   Widget build(BuildContext context) {
-    // Gets the shared theme state from ThemeProvider.
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "Ephemeral vs App State",
-
-      // Light theme configuration.
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-        ),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: () => ThemeProvider(),
+      child: ScreenUtilInit(
+        designSize: const Size(412, 715),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (build, child) {
+          final themeModel = build.watch<ThemeProvider>();
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: themeModel.lightTheme,
+            darkTheme: themeModel.darkTheme,
+            themeMode: themeModel.isDark ? ThemeMode.dark : 
+  ThemeMode.light,
+            title: 'E-Commerce App',
+            initialRoute: '/home',
+            routes: {
+              '/home': (context) => const HomeScreen(),
+              '/settings': (context) => const SettingsScreen(),
+            },
+          );
+        },
       ),
-
-      // Dark theme configuration.
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-
-      // Uses the theme selected by the user.
-      // Provider manages the app-wide theme state.
-      themeMode:
-          themeProvider.isDark ? ThemeMode.dark : ThemeMode.light,
-
-      // Opens the Counter Screen when the app starts.
-      home: const CounterScreen(),
     );
   }
 }
