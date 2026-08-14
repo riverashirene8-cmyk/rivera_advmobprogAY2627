@@ -1,17 +1,9 @@
-# rivera_advmobprog
+# Shirene D. Rivera
+## INF233
+## CTADMOBL Advance Mobile Programming
 
-A new Flutter project.
+A Flutter Project that focuses on advance topics. Covering the web to mobile transactions
 
-## Getting Started
+## Lab Activity Instance
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Lab Activity 1 : This Flutter application demonstrates the use of both ephemeral state and app state. The counter uses setState() to manage local changes, while Provider manages the Light and Dark Mode across the application. The app consists of two screens: a Counter Screen for managing the counter and a Theme Settings Screen for switching between light and dark themes.
