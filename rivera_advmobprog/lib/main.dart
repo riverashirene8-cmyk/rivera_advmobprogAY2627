@@ -14,15 +14,12 @@ import 'providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
 
- SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then
-((   
-
-      _,
-) async {
   await dotenv.load(fileName: 'assets/.env');
   runApp(const RiveraAdvMobProg());
-});
 }
 class RiveraAdvMobProg extends StatelessWidget {
   const RiveraAdvMobProg({super.key});
@@ -30,7 +27,7 @@ class RiveraAdvMobProg extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: () => ThemeProvider(),
+      create: (context) => ThemeProvider(),
       child: ScreenUtilInit(
         designSize: const Size(412, 715),
         minTextAdapt: true,

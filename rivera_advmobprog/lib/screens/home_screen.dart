@@ -14,25 +14,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int selectedIndex = 0;
-  final PageController pageController = PageController();
+  int _selectedIndex = 0;
+  final PageController _pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
+    return WillPopScope(
+      onWillPop: () async => false,
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
           elevation: 2,
-          title: selectedIndex == 0
+            title: _selectedIndex == 0
               ? Image.asset( 'assets/images/nubdexchange_logo.png',scale: 11.sp,)
               : CustomText(
-                  text: selectedIndex == 1
+                    text: _selectedIndex == 1
                       ? 'Chat'
-                      : selectedIndex == 2
-                          ? 'Profile'
-                          : 'Home',
+                      : _selectedIndex == 2
+                        ? 'Profile'
+                        : 'Home',
                   fontSize: 20.sp,
                   // color: FB_LIGHT_PRIMARY,
                   fontWeight: FontWeight.w600,
@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: PageView(
           physics: const NeverScrollableScrollPhysics(),
-          controller: pageController,
+          controller: _pageController,
           children: const <Widget>[ProductScreen()],
           onPageChanged: (page) {
             setState(() {
@@ -71,8 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void onTappedBar(int value) {
     setState(() {
-      selectedIndex = value;
+      _selectedIndex = value;
     });
-   _pageController.jumpToPage(value);
+    _pageController.jumpToPage(value);
   }
 }

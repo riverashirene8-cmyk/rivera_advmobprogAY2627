@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-// models
-import '../models/product.dart';
+import '../models/products_model.dart';
 
-// services
-import '../services/product_service.dart';
+import '../services/product_services.dart';
 
-// widgets
 import '../widgets/custom_text.dart';
+
+import 'product_details_screen.dart';
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({super.key});
@@ -20,42 +19,74 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   late final Future<List<Product>> _productsFuture;
 
+  final TextEditingController _searchController =
+      TextEditingController();
+
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
+
     _productsFuture = ProductService().getAllProducts();
+
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.toLowerCase();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 16.h,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: ScreenUtil().screenWidth,
-              padding: EdgeInsets.symmetric(horizontal: 16.w,vertical: 12.h),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(),
-              ),
-              child: CustomText(
-                text: 'Search',
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
+            // Added a search bar that allows
+            // users to search for products.
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search products',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
               ),
             ),
+
             SizedBox(height: 16.h),
+
             FutureBuilder<List<Product>>(
               future: _productsFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
                   return Center(
                     child: Padding(
                       padding: EdgeInsets.all(32.r),
-                      child: const CircularProgressIndicator(),
+                      child:
+                          const CircularProgressIndicator(),
                     ),
                   );
                 }
@@ -70,6 +101,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 }
 
                 final products = snapshot.data ?? [];
+
                 if (products.isEmpty) {
                   return Center(
                     child: CustomText(
@@ -79,58 +111,110 @@ class _ProductScreenState extends State<ProductScreen> {
                   );
                 }
 
+                //  Filters the product list based
+                // on the user's search query.
+                final filteredProducts =
+                    products.where((product) {
+                  return product.title
+                      .toLowerCase()
+                      .contains(_searchQuery);
+                }).toList();
+
+                if (filteredProducts.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.r),
+                      child: CustomText(
+                        text:
+                            'No products found for "$_searchQuery".',
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  );
+                }
+
                 return GridView.builder(
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: products.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  physics:
+                      const NeverScrollableScrollPhysics(),
+                  itemCount: filteredProducts.length,
+                  gridDelegate:
+                      SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 10.w,
                     mainAxisSpacing: 10.h,
                     childAspectRatio: 0.75,
                   ),
                   itemBuilder: (context, index) {
-                    final product = products[index];
+                    final product = filteredProducts[index];
+
                     return Card(
                       elevation: 2,
                       clipBehavior: Clip.antiAlias,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius:
+                            BorderRadius.circular(12.r),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Image.network(
-                              product.thumbnail,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              errorBuilder: (_, __, ___) =>
-                                  Icons(Icons.image, size: 24.sp),
+
+                      //  Added navigation to the
+                      // product details screen when a product
+                      // card is selected.
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductDetailsScreen(
+                                product: product,
+                              ),
                             ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(8.r),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CustomText(
-                                  text: product.title,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.bold,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Image.network(
+                                product.thumbnail,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                errorBuilder: (_, _, _) =>
+                                    Icon(
+                                  Icons.image,
+                                  size: 24.sp,
                                 ),
-                                SizedBox(height: 4.h),
-                                CustomText(
-                                  text: '\$${product.price.toStringAsFixed(2)}',
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ],
+                            Padding(
+                              padding: EdgeInsets.all(8.r),
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  CustomText(
+                                    text: product.title,
+                                    fontSize: 14.sp,
+                                    fontWeight:
+                                        FontWeight.bold,
+                                    maxLines: 1,
+                                    overflow:
+                                        TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 4.h),
+                                  CustomText(
+                                    text:
+                                        '\$${product.price.toStringAsFixed(2)}',
+                                    fontSize: 13.sp,
+                                    fontWeight:
+                                        FontWeight.w600,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
