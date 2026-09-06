@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../models/products_model.dart';
-
 import 'detail_screen.dart';
 
 class ProductDetailsScreen
@@ -14,8 +13,9 @@ class ProductDetailsScreen
   });
 
   @override
-  Widget build(BuildContext context) {
-    // I use the detail screen here to show the selected product information.
+  Widget build(
+    BuildContext context,
+  ) {
     return DetailScreen(
       productId: product.id,
     );

@@ -19,7 +19,7 @@ class Cart {
 
   factory Cart.fromJson(Map<String, dynamic> json) {
     return Cart(
-      id: json['id'] ?? 0,
+      id: (json['id'] as num?)?.toInt() ?? 0,
 
       products: (json['products'] as List?)
               ?.map(
@@ -32,16 +32,16 @@ class Cart {
 
       total: (json['total'] as num?)?.toDouble() ?? 0.0,
 
-        discountedTotal: ((json['discountedTotal'] ??
-              json['discountedPrice']) as num?)
-            ?.toDouble() ??
-          0.0,
+      discountedTotal:
+          (json['discountedTotal'] as num?)?.toDouble() ?? 0.0,
 
-      userId: json['userId'] ?? 0,
+      userId: (json['userId'] as num?)?.toInt() ?? 0,
 
-      totalProducts: json['totalProducts'] ?? 0,
+      totalProducts:
+          (json['totalProducts'] as num?)?.toInt() ?? 0,
 
-      totalQuantity: json['totalQuantity'] ?? 0,
+      totalQuantity:
+          (json['totalQuantity'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -81,13 +81,13 @@ class CartProduct {
 
   factory CartProduct.fromJson(Map<String, dynamic> json) {
     return CartProduct(
-      id: json['id'] ?? 0,
+      id: (json['id'] as num?)?.toInt() ?? 0,
 
-      title: json['title'] ?? '',
+      title: json['title']?.toString() ?? '',
 
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
 
-      quantity: json['quantity'] ?? 0,
+      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
 
       total: (json['total'] as num?)?.toDouble() ?? 0.0,
 
@@ -97,7 +97,7 @@ class CartProduct {
       discountedTotal:
           (json['discountedTotal'] as num?)?.toDouble() ?? 0.0,
 
-      thumbnail: json['thumbnail'] ?? '',
+      thumbnail: json['thumbnail']?.toString() ?? '',
     );
   }
 
@@ -114,10 +114,6 @@ class CartProduct {
     };
   }
 
-  // ==========================================================
-  // Helper used by CartProvider when changing quantity.
-  // ==========================================================
-
   CartProduct copyWith({
     int? quantity,
   }) {
@@ -125,11 +121,9 @@ class CartProduct {
 
     final newTotal = price * newQuantity;
 
-    final discount =
-        newTotal * (discountPercentage / 100);
+    final discount = newTotal * (discountPercentage / 100);
 
-    final newDiscountedTotal =
-        newTotal - discount;
+    final newDiscountedTotal = newTotal - discount;
 
     return CartProduct(
       id: id,

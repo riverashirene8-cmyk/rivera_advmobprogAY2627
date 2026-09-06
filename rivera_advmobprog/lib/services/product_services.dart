@@ -6,13 +6,11 @@ import '../constants.dart';
 import '../models/products_model.dart';
 
 class ProductService {
-  // ==========================================================
-  // Get all products
-  // ==========================================================
-
   Future<List<Product>> getAllProducts() async {
+    final String url = '$host/products';
+
     final response = await http.get(
-      Uri.parse('$host/products'),
+      Uri.parse(url),
     );
 
     if (response.statusCode != 200) {
@@ -23,27 +21,29 @@ class ProductService {
     }
 
     final Map<String, dynamic> data =
-        jsonDecode(response.body);
+        Map<String, dynamic>.from(
+      jsonDecode(response.body),
+    );
 
-    final List productsJson =
-        data['products'] ?? [];
+    final List<dynamic> products =
+        data['products'] as List<dynamic>? ?? [];
 
-    return productsJson
+    return products
         .map(
           (json) => Product.fromJson(
-            Map<String, dynamic>.from(json),
+            Map<String, dynamic>.from(
+              json as Map,
+            ),
           ),
         )
         .toList();
   }
 
-  // ==========================================================
-  // Get one product by ID
-  // ==========================================================
-
   Future<Product> getProductById(int id) async {
+    final String url = '$host/products/$id';
+
     final response = await http.get(
-      Uri.parse('$host/products/$id'),
+      Uri.parse(url),
     );
 
     if (response.statusCode != 200) {

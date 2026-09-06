@@ -4,14 +4,15 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
+import 'providers/cart_provider.dart';
+import 'providers/theme_provider.dart';
+
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/cart_screen.dart';
+import 'screens/signin_screen.dart';
+import 'screens/splash_screen.dart';
 
-import 'providers/theme_provider.dart';
-import 'providers/cart_provider.dart';
-
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await SystemChrome.setPreferredOrientations([
@@ -29,33 +30,45 @@ void main() async {
 
 class RiveraAdvMobProg
     extends StatelessWidget {
-  const RiveraAdvMobProg({super.key});
+  const RiveraAdvMobProg({
+    super.key,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => ThemeProvider(),
+          create: (_) =>
+              ThemeProvider(),
         ),
 
         ChangeNotifierProvider(
-          create: (_) => CartProvider(),
+          create: (_) =>
+              CartProvider(),
         ),
       ],
+
       child: ScreenUtilInit(
         designSize:
             const Size(412, 715),
         minTextAdapt: true,
         splitScreenMode: true,
-        builder: (context, child) {
+
+        builder:
+            (context, child) {
           final themeModel =
-              context.watch<ThemeProvider>();
+              context.watch<
+                  ThemeProvider>();
 
           return MaterialApp(
             debugShowCheckedModeBanner:
                 false,
-            title: 'E-Commerce App',
+
+            title:
+                'NUBD Exchange',
 
             theme:
                 themeModel.lightTheme,
@@ -68,17 +81,22 @@ class RiveraAdvMobProg
                     ? ThemeMode.dark
                     : ThemeMode.light,
 
-            initialRoute: '/home',
+            // SAMPLE OUTPUT STARTS HERE
+            initialRoute:
+                '/splash',
 
             routes: {
+              '/splash': (_) =>
+                  const SplashScreen(),
+
+              '/signin': (_) =>
+                  const SignInScreen(),
+
               '/home': (_) =>
                   const HomeScreen(),
 
               '/settings': (_) =>
                   const SettingsScreen(),
-
-              '/cart': (_) =>
-                  const CartScreen(),
             },
           );
         },

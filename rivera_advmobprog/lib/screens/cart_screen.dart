@@ -6,53 +6,65 @@ import '../providers/cart_provider.dart';
 import 'detail_screen.dart';
 
 class CartScreen extends StatefulWidget {
-  const CartScreen({super.key});
+  const CartScreen({
+    super.key,
+  });
 
   @override
-  State<CartScreen> createState() => _CartScreenState();
+  State<CartScreen> createState() =>
+      _CartScreenState();
 }
 
-class _CartScreenState extends State<CartScreen> {
+class _CartScreenState
+    extends State<CartScreen> {
   @override
   void initState() {
     super.initState();
 
-    // ==========================================================
-    // I load the cart for DummyJSON User ID 1 when this screen opens.
-    // ==========================================================
-
+    // ENHANCEMENT 3:
+    // Loads the cart using the currently authenticated
+    // user's saved ID through CartProvider.
     Future.microtask(() {
       if (!mounted) {
         return;
       }
 
-      context.read<CartProvider>().loadCart();
+      context
+          .read<CartProvider>()
+          .loadCart();
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return Consumer<CartProvider>(
-      builder: (context, cartProvider, child) {
+      builder:
+          (context, cartProvider, child) {
         if (cartProvider.isLoading) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child:
+                CircularProgressIndicator(),
           );
         }
 
         if (cartProvider.error != null) {
           return Center(
             child: Padding(
-              padding: EdgeInsets.all(20.r),
+              padding:
+                  EdgeInsets.all(20.r),
               child: Text(
                 cartProvider.error!,
-                textAlign: TextAlign.center,
+                textAlign:
+                    TextAlign.center,
               ),
             ),
           );
         }
 
-        final items = cartProvider.items;
+        final items =
+            cartProvider.items;
 
         if (items.isEmpty) {
           return const Center(
@@ -68,58 +80,77 @@ class _CartScreenState extends State<CartScreen> {
         return SafeArea(
           child: Column(
             children: [
-              // ==================================================
-              // CART ITEMS
-              // ==================================================
-
               Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.fromLTRB(
+                child:
+                    ListView.builder(
+                  padding:
+                      EdgeInsets.fromLTRB(
                     10.w,
                     12.h,
                     10.w,
                     5.h,
                   ),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final item = items[index];
+                  itemCount:
+                      items.length,
+                  itemBuilder:
+                      (context, index) {
+                    final item =
+                        items[index];
 
                     return Container(
-                      margin: EdgeInsets.only(
+                      margin:
+                          EdgeInsets.only(
                         bottom: 10.h,
                       ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surface,
+                      decoration:
+                          BoxDecoration(
+                        color:
+                            Theme.of(
+                          context,
+                        )
+                                .colorScheme
+                                .surface,
                         borderRadius:
-                            BorderRadius.circular(12.r),
+                            BorderRadius
+                                .circular(
+                          12.r,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(
+                            color: Colors
+                                .black
+                                .withValues(
                               alpha: 0.05,
                             ),
                             blurRadius: 8,
                             offset:
-                                const Offset(0, 3),
+                                const Offset(
+                              0,
+                              3,
+                            ),
                           ),
                         ],
                       ),
-
-                      // ==================================================
-                      // Tapping a cart item opens its product details.
-                      // ==================================================
-
-                      child: InkWell(
+                      child:
+                          InkWell(
                         borderRadius:
-                            BorderRadius.circular(12.r),
+                            BorderRadius
+                                .circular(
+                          12.r,
+                        ),
+
+                        // Enhancement 3 / Cart requirement:
+                        // Cart products can be opened to their
+                        // corresponding product details.
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  DetailScreen(
-                                productId: item.id,
+                              builder:
+                                  (_) =>
+                                      DetailScreen(
+                                productId:
+                                    item.id,
                               ),
                             ),
                           );
@@ -127,27 +158,32 @@ class _CartScreenState extends State<CartScreen> {
 
                         child: Padding(
                           padding:
-                              EdgeInsets.all(10.r),
-
+                              EdgeInsets
+                                  .all(
+                            10.r,
+                          ),
                           child: Row(
                             children: [
-                              // ==================================================
-                              // PRODUCT IMAGE
-                              // ==================================================
-
                               Container(
-                                width: 75.w,
-                                height: 75.h,
+                                width:
+                                    75.w,
+                                height:
+                                    75.h,
                                 decoration:
                                     BoxDecoration(
-                                  color: Colors.white,
+                                  color:
+                                      Colors.white,
                                   borderRadius:
                                       BorderRadius
-                                          .circular(8.r),
+                                          .circular(
+                                    8.r,
+                                  ),
                                 ),
-                                child: Image.network(
+                                child:
+                                    Image.network(
                                   item.thumbnail,
-                                  fit: BoxFit.contain,
+                                  fit: BoxFit
+                                      .contain,
                                   errorBuilder:
                                       (
                                     context,
@@ -162,27 +198,28 @@ class _CartScreenState extends State<CartScreen> {
                                 ),
                               ),
 
-                              SizedBox(width: 10.w),
-
-                              // ==================================================
-                              // PRODUCT INFORMATION
-                              // ==================================================
+                              SizedBox(
+                                width: 10.w,
+                              ),
 
                               Expanded(
-                                child: Column(
+                                child:
+                                    Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment
                                           .start,
                                   children: [
                                     Text(
                                       item.title,
-                                      maxLines: 1,
+                                      maxLines:
+                                          1,
                                       overflow:
                                           TextOverflow
                                               .ellipsis,
                                       style:
                                           TextStyle(
-                                        fontSize: 13.sp,
+                                        fontSize:
+                                            13.sp,
                                         fontWeight:
                                             FontWeight
                                                 .bold,
@@ -190,7 +227,8 @@ class _CartScreenState extends State<CartScreen> {
                                     ),
 
                                     SizedBox(
-                                      height: 5.h,
+                                      height:
+                                          5.h,
                                     ),
 
                                     Text(
@@ -200,7 +238,8 @@ class _CartScreenState extends State<CartScreen> {
                                         color: Colors
                                             .amber
                                             .shade800,
-                                        fontSize: 13.sp,
+                                        fontSize:
+                                            13.sp,
                                         fontWeight:
                                             FontWeight
                                                 .bold,
@@ -208,14 +247,16 @@ class _CartScreenState extends State<CartScreen> {
                                     ),
 
                                     SizedBox(
-                                      height: 3.h,
+                                      height:
+                                          3.h,
                                     ),
 
                                     Text(
                                       '${item.discountPercentage.toStringAsFixed(0)}% off • \$${item.discountedTotal.toStringAsFixed(2)} total',
                                       style:
                                           TextStyle(
-                                        fontSize: 9.sp,
+                                        fontSize:
+                                            9.sp,
                                         color: Colors
                                             .grey
                                             .shade600,
@@ -225,20 +266,21 @@ class _CartScreenState extends State<CartScreen> {
                                 ),
                               ),
 
-                              SizedBox(width: 8.w),
-
-                              // ==================================================
-                              // QUANTITY BUTTONS
-                              // ==================================================
+                              SizedBox(
+                                width: 8.w,
+                              ),
 
                               Column(
                                 children: [
                                   SizedBox(
-                                    width: 32.w,
-                                    height: 32.h,
+                                    width:
+                                        32.w,
+                                    height:
+                                        32.h,
                                     child:
                                         ElevatedButton(
-                                      onPressed: () {
+                                      onPressed:
+                                          () {
                                         cartProvider
                                             .increaseQuantity(
                                           index,
@@ -248,8 +290,7 @@ class _CartScreenState extends State<CartScreen> {
                                           ElevatedButton
                                               .styleFrom(
                                         padding:
-                                            EdgeInsets
-                                                .zero,
+                                            EdgeInsets.zero,
                                         backgroundColor:
                                             const Color(
                                           0xFFFFC107,
@@ -281,7 +322,8 @@ class _CartScreenState extends State<CartScreen> {
                                     '${item.quantity}',
                                     style:
                                         TextStyle(
-                                      fontSize: 12.sp,
+                                      fontSize:
+                                          12.sp,
                                       fontWeight:
                                           FontWeight
                                               .bold,
@@ -293,11 +335,14 @@ class _CartScreenState extends State<CartScreen> {
                                   ),
 
                                   SizedBox(
-                                    width: 32.w,
-                                    height: 32.h,
+                                    width:
+                                        32.w,
+                                    height:
+                                        32.h,
                                     child:
                                         ElevatedButton(
-                                      onPressed: () {
+                                      onPressed:
+                                          () {
                                         cartProvider
                                             .decreaseQuantity(
                                           index,
@@ -307,8 +352,7 @@ class _CartScreenState extends State<CartScreen> {
                                           ElevatedButton
                                               .styleFrom(
                                         padding:
-                                            EdgeInsets
-                                                .zero,
+                                            EdgeInsets.zero,
                                         backgroundColor:
                                             Theme.of(
                                           context,
@@ -345,28 +389,34 @@ class _CartScreenState extends State<CartScreen> {
                 ),
               ),
 
-              // ==================================================
-              // ORDER SUMMARY
-              // ==================================================
-
+              // CART SUMMARY
               Container(
-                width: double.infinity,
-                padding: EdgeInsets.fromLTRB(
+                width:
+                    double.infinity,
+                padding:
+                    EdgeInsets.fromLTRB(
                   16.w,
                   8.h,
                   16.w,
                   10.h,
                 ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .scaffoldBackgroundColor,
+                decoration:
+                    BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).scaffoldBackgroundColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(
+                      color: Colors.black
+                          .withValues(
                         alpha: 0.05,
                       ),
                       blurRadius: 8,
-                      offset: const Offset(0, -2),
+                      offset:
+                          const Offset(
+                        0,
+                        -2,
+                      ),
                     ),
                   ],
                 ),
@@ -374,18 +424,25 @@ class _CartScreenState extends State<CartScreen> {
                   children: [
                     _summaryRow(
                       'Subtotal',
-                      cartProvider.subtotal,
+                      cartProvider
+                          .subtotal,
                     ),
 
-                    SizedBox(height: 5.h),
+                    SizedBox(
+                      height: 5.h,
+                    ),
 
                     _summaryRow(
                       'Discount',
-                      cartProvider.discount,
-                      isDiscount: true,
+                      cartProvider
+                          .discount,
+                      isDiscount:
+                          true,
                     ),
 
-                    SizedBox(height: 7.h),
+                    SizedBox(
+                      height: 7.h,
+                    ),
 
                     Row(
                       mainAxisAlignment:
@@ -394,19 +451,26 @@ class _CartScreenState extends State<CartScreen> {
                       children: [
                         Text(
                           'Total',
-                          style: TextStyle(
-                            fontSize: 17.sp,
+                          style:
+                              TextStyle(
+                            fontSize:
+                                17.sp,
                             fontWeight:
-                                FontWeight.bold,
+                                FontWeight
+                                    .bold,
                           ),
                         ),
                         Text(
                           '\$${cartProvider.total.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 18.sp,
+                          style:
+                              TextStyle(
+                            fontSize:
+                                18.sp,
                             fontWeight:
-                                FontWeight.bold,
-                            color: const Color(
+                                FontWeight
+                                    .bold,
+                            color:
+                                const Color(
                               0xFF3949AB,
                             ),
                           ),
@@ -414,29 +478,33 @@ class _CartScreenState extends State<CartScreen> {
                       ],
                     ),
 
-                    SizedBox(height: 10.h),
-
-                    // ==================================================
-                    // CONFIRM ORDER
-                    // ==================================================
-
                     SizedBox(
-                      width: double.infinity,
+                      height: 10.h,
+                    ),
+
+                    // CONFIRM ORDER
+                    SizedBox(
+                      width:
+                          double.infinity,
                       height: 50.h,
-                      child: ElevatedButton(
+                      child:
+                          ElevatedButton(
                         onPressed: () {
-                          ScaffoldMessenger.of(
+                          ScaffoldMessenger
+                              .of(
                             context,
                           ).showSnackBar(
                             const SnackBar(
-                              content: Text(
+                              content:
+                                  Text(
                                 'Order confirmed!',
                               ),
                             ),
                           );
                         },
                         style:
-                            ElevatedButton.styleFrom(
+                            ElevatedButton
+                                .styleFrom(
                           backgroundColor:
                               const Color(
                             0xFFFFC107,
@@ -447,17 +515,21 @@ class _CartScreenState extends State<CartScreen> {
                           shape:
                               RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.circular(
+                                BorderRadius
+                                    .circular(
                               10.r,
                             ),
                           ),
                         ),
                         child: Text(
                           'Confirm Order',
-                          style: TextStyle(
-                            fontSize: 14.sp,
+                          style:
+                              TextStyle(
+                            fontSize:
+                                14.sp,
                             fontWeight:
-                                FontWeight.bold,
+                                FontWeight
+                                    .bold,
                           ),
                         ),
                       ),
@@ -479,13 +551,15 @@ class _CartScreenState extends State<CartScreen> {
   }) {
     return Row(
       mainAxisAlignment:
-          MainAxisAlignment.spaceBetween,
+          MainAxisAlignment
+              .spaceBetween,
       children: [
         Text(
           title,
           style: TextStyle(
             fontSize: 12.sp,
-            color: Colors.grey.shade600,
+            color:
+                Colors.grey.shade600,
           ),
         ),
         Text(
@@ -495,7 +569,8 @@ class _CartScreenState extends State<CartScreen> {
             color: isDiscount
                 ? Colors.green
                 : Colors.grey.shade700,
-            fontWeight: FontWeight.w600,
+            fontWeight:
+                FontWeight.w600,
           ),
         ),
       ],

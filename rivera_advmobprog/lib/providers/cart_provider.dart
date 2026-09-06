@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../constants.dart';
 import '../models/cart.dart';
 import '../models/products_model.dart';
 import '../services/cart_service.dart';
+import '../services/user_service.dart';
 
 class CartProvider extends ChangeNotifier {
   final CartService _cartService = CartService();
+  final UserService _userService = UserService();
 
   List<CartProduct> _items = [];
 
@@ -14,9 +15,7 @@ class CartProvider extends ChangeNotifier {
 
   String? _error;
 
-  // ==========================================================
-  // Getters
-  // ==========================================================
+  int? _userId;
 
   List<CartProduct> get items => _items;
 
@@ -24,25 +23,38 @@ class CartProvider extends ChangeNotifier {
 
   String? get error => _error;
 
-  // ==========================================================
-  // This loads the cart for DummyJSON User ID 1 from the API.
-  //
-  // This calls:
-  // GET /carts/user/1
-  // ==========================================================
+  int? get userId => _userId;
 
+  // ENHANCEMENT 3:
+  // Gets the ID of the currently authenticated user
+  // from the saved user data through UserService.
+  // This prevents the cart from using a hardcoded user ID.
+  Future<int> _getCurrentUserId() async {
+    if (_userId != null) {
+      return _userId!;
+    }
+
+    final user = await _userService.getUser();
+
+    _userId = user.id;
+
+    return user.id;
+  }
+
+  // ENHANCEMENT 3:
+  // Loads the cart belonging to the currently
+  // authenticated user using the saved user ID.
   Future<void> loadCart() async {
     _isLoading = true;
-
     _error = null;
 
     notifyListeners();
 
     try {
+      final userId = await _getCurrentUserId();
+
       final cart =
-          await _cartService.getCartByUserId(
-        dummyUserId,
-      );
+          await _cartService.getCartByUserId(userId);
 
       if (cart != null) {
         final currentItemsById = {
@@ -63,8 +75,6 @@ class CartProvider extends ChangeNotifier {
             (item) => !serverItemIds.contains(item.id),
           ),
         ];
-      } else {
-        _items = List<CartProduct>.from(_items);
       }
     } catch (e) {
       _error = e.toString();
@@ -75,20 +85,20 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ==========================================================
-  // This sends the product to DummyJSON and then updates the local cart.
-  //
-  // The API call is made first.
-  // Since DummyJSON does not permanently save POST changes,
-  // we also update the local cart after a successful request.
-  // ==========================================================
-
-  Future<void> addProduct(Product product) async {
+  // ENHANCEMENT 3:
+  // Adds the selected product to the cart using
+  // the currently authenticated user's ID.
+  Future<void> addProduct(
+    Product product,
+  ) async {
     _error = null;
 
     try {
-      final addedCart = await _cartService.addToCart(
-        userId: dummyUserId,
+      final userId = await _getCurrentUserId();
+
+      final addedCart =
+          await _cartService.addToCart(
+        userId: userId,
         productId: product.id,
         quantity: 1,
       );
@@ -98,24 +108,36 @@ class CartProvider extends ChangeNotifier {
       );
 
       if (index >= 0) {
-        _items[index] = _items[index].copyWith(
-          quantity: _items[index].quantity + 1,
+        _items[index] =
+            _items[index].copyWith(
+          quantity:
+              _items[index].quantity + 1,
         );
       } else {
-        final addedItem = addedCart.products.firstWhere(
-          (item) => item.id == product.id,
-          orElse: () => CartProduct(
+        CartProduct addedItem;
+
+        try {
+          addedItem =
+              addedCart.products.firstWhere(
+            (item) => item.id == product.id,
+          );
+        } catch (_) {
+          addedItem = CartProduct(
             id: product.id,
             title: product.title,
             price: product.price,
             quantity: 1,
             total: product.price,
-            discountPercentage: product.discountPercentage,
-            discountedTotal: product.price *
-                (1 - product.discountPercentage / 100),
+            discountPercentage:
+                product.discountPercentage,
+            discountedTotal:
+                product.price *
+                    (1 -
+                        product.discountPercentage /
+                            100),
             thumbnail: product.thumbnail,
-          ),
-        );
+          );
+        }
 
         _items.add(addedItem);
       }
@@ -130,37 +152,37 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  // ==========================================================
-  // Increase quantity
-  // ==========================================================
-
-  void increaseQuantity(int index) {
-    if (index < 0 || index >= _items.length) {
+  void increaseQuantity(
+    int index,
+  ) {
+    if (index < 0 ||
+        index >= _items.length) {
       return;
     }
 
     final item = _items[index];
 
-    _items[index] = item.copyWith(
+    _items[index] =
+        item.copyWith(
       quantity: item.quantity + 1,
     );
 
     notifyListeners();
   }
 
-  // ==========================================================
-  // Decrease quantity
-  // ==========================================================
-
-  void decreaseQuantity(int index) {
-    if (index < 0 || index >= _items.length) {
+  void decreaseQuantity(
+    int index,
+  ) {
+    if (index < 0 ||
+        index >= _items.length) {
       return;
     }
 
     final item = _items[index];
 
     if (item.quantity > 1) {
-      _items[index] = item.copyWith(
+      _items[index] =
+          item.copyWith(
         quantity: item.quantity - 1,
       );
     } else {
@@ -170,10 +192,6 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ==========================================================
-  // Subtotal
-  // ==========================================================
-
   double get subtotal {
     return _items.fold(
       0.0,
@@ -181,41 +199,27 @@ class CartProvider extends ChangeNotifier {
     );
   }
 
-  // ==========================================================
-  // Total discount
-  // ==========================================================
-
   double get discount {
     return _items.fold(
       0.0,
       (sum, item) =>
           sum +
-          (item.total - item.discountedTotal),
+          (item.total -
+              item.discountedTotal),
     );
   }
-
-  // ==========================================================
-  // Final total
-  // ==========================================================
 
   double get total {
     return subtotal - discount;
   }
 
-  // ==========================================================
-  // Total quantity
-  // ==========================================================
-
   int get totalQuantity {
     return _items.fold(
       0,
-      (sum, item) => sum + item.quantity,
+      (sum, item) =>
+          sum + item.quantity,
     );
   }
-
-  // ==========================================================
-  // Clear cart
-  // ==========================================================
 
   void clearCart() {
     _items.clear();

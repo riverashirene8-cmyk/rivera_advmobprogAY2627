@@ -1,98 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'product_screen.dart';
+import '../services/user_service.dart';
 import 'cart_screen.dart';
+import 'product_screen.dart';
+import 'profile_screen.dart';
 
-import '../widgets/custom_text.dart';
-
-class HomeScreen
-    extends StatefulWidget {
-  final String username;
-
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
-    this.username = '',
   });
 
   @override
-  State<HomeScreen> createState() =>
-      _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState
-    extends State<HomeScreen> {
-  int _selectedIndex = 0;
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 2;
 
-  final PageController
-      _pageController =
-      PageController();
+  final PageController _pageController = PageController(
+    initialPage: 2,
+  );
+
+  final UserService _userService = UserService();
+
+  String _firstName = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final user = await _userService.getUser();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _firstName = user.firstName;
+    });
+  }
 
   @override
   void dispose() {
     _pageController.dispose();
-
     super.dispose();
   }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
-    final bool isCartScreen =
-        _selectedIndex == 1;
+  Widget build(BuildContext context) {
+    final bool isCartScreen = _selectedIndex == 1;
 
     return PopScope(
       canPop: false,
       child: Scaffold(
-        // ======================================================
-        // APP BAR
-        // ======================================================
-
         appBar: AppBar(
-          automaticallyImplyLeading:
-              false,
+          automaticallyImplyLeading: false,
 
-          elevation: 2,
-
-          backgroundColor:
-              isCartScreen
-                  ? const Color(
-                      0xFF3949AB,
-                    )
-                  : null,
-
-          foregroundColor:
-              isCartScreen
-                  ? Colors.white
-                  : null,
-
-          title:
-              _selectedIndex == 0
-                  ? Image.asset(
-                      'assets/images/nubdexchange_logo.png',
-                      scale: 11.sp,
-                    )
-                  : CustomText(
-                      text:
-                          _selectedIndex ==
-                                  1
-                              ? 'Cart'
-                              : 'Profile',
-
-                      fontSize:
-                          20.sp,
-
-                      fontWeight:
-                          FontWeight
-                              .w600,
-
-                      color:
-                          isCartScreen
-                              ? Colors
-                                  .white
-                              : null,
-                    ),
+          // DYNAMIC USER FIRST NAME
+          title: Text(
+            _firstName.isEmpty ? 'Profile' : _firstName,
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
 
           actions: [
             IconButton(
@@ -100,7 +76,6 @@ class _HomeScreenState
                 Icons.settings,
                 size: 24.sp,
               ),
-
               onPressed: () {
                 Navigator.pushNamed(
                   context,
@@ -111,86 +86,46 @@ class _HomeScreenState
           ],
         ),
 
-        // ======================================================
-        // BODY
-        // ======================================================
-
         body: PageView(
-          controller:
-              _pageController,
-
-          physics:
-              const NeverScrollableScrollPhysics(),
-
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
           children: const [
             ProductScreen(),
             CartScreen(),
-            SizedBox(),
+            ProfileScreen(),
           ],
-
-          onPageChanged:
-              (page) {
+          onPageChanged: (page) {
             setState(() {
-              _selectedIndex =
-                  page;
+              _selectedIndex = page;
             });
           },
         ),
 
-        // ======================================================
-        // CHAT BUTTON
-        // ======================================================
-
-        // I show the chat button only on the home screen.
-        floatingActionButton:
-          _selectedIndex != 0
-                ? null
-                : FloatingActionButton(
-                    backgroundColor:
-                        const Color(
-                      0xFF3949AB,
+        // HIDE CHAT FAB ON CART
+        floatingActionButton: isCartScreen
+            ? null
+            : FloatingActionButton(
+                backgroundColor: const Color(0xFFFFC107),
+                foregroundColor: Colors.black,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Chat feature opened',
+                      ),
                     ),
+                  );
+                },
+                child: const Icon(
+                  Icons.chat,
+                ),
+              ),
 
-                    foregroundColor:
-                        Colors.white,
-
-                    onPressed: () {
-                      ScaffoldMessenger
-                              .of(
-                        context,
-                      ).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Chat feature opened',
-                          ),
-                        ),
-                      );
-                    },
-
-                    child:
-                        const Icon(
-                      Icons.chat,
-                    ),
-                  ),
-
-        // ======================================================
-        // BOTTOM NAVIGATION
-        // ======================================================
-
-        bottomNavigationBar:
-            BottomNavigationBar(
-          currentIndex:
-              _selectedIndex,
-
-          onTap:
-              onTappedBar,
-
-          showSelectedLabels:
-              false,
-
-          showUnselectedLabels:
-              false,
-
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onTappedBar,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(
@@ -198,14 +133,12 @@ class _HomeScreenState
               ),
               label: 'Shop',
             ),
-
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.shopping_cart,
               ),
               label: 'Cart',
             ),
-
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.person,
@@ -218,22 +151,11 @@ class _HomeScreenState
     );
   }
 
-  void onTappedBar(
-    int value,
-  ) {
+  void _onTappedBar(int value) {
     setState(() {
-      _selectedIndex =
-          value;
+      _selectedIndex = value;
     });
 
-    if (value == 2) {
-      _pageController.jumpToPage(
-        2,
-      );
-    } else {
-      _pageController.jumpToPage(
-        value,
-      );
-    }
+    _pageController.jumpToPage(value);
   }
 }

@@ -6,48 +6,54 @@ import '../constants.dart';
 import '../models/cart.dart';
 
 class CartService {
-  // This gets the cart for one DummyJSON user.
-
+  // ENHANCEMENT 3:
+  // Loads the cart using the saved user's ID.
+  // This allows the application to display the cart
+  // belonging to the currently authenticated user.
   Future<Cart?> getCartByUserId(int userId) async {
+    final String url = '$host/carts/user/$userId';
+
     final response = await http.get(
-      Uri.parse('$host/carts/user/$userId'),
+      Uri.parse(url),
     );
 
     if (response.statusCode != 200) {
       throw Exception(
-        'Failed to load cart. '
-        'Status: ${response.statusCode}',
+        'Failed to load cart. Status: ${response.statusCode}',
       );
     }
 
     final Map<String, dynamic> data =
-        jsonDecode(response.body);
+        Map<String, dynamic>.from(
+      jsonDecode(response.body),
+    );
 
-    final List cartsJson =
-        data['carts'] ?? [];
+    final List<dynamic> carts =
+        data['carts'] as List<dynamic>? ?? [];
 
-    if (cartsJson.isEmpty) {
+    if (carts.isEmpty) {
       return null;
     }
 
-    // I use the first cart returned for this user.
     return Cart.fromJson(
       Map<String, dynamic>.from(
-        cartsJson.first,
+        carts.first as Map,
       ),
     );
   }
 
-  // This sends the selected product to DummyJSON's add-cart endpoint.
-  // The provider updates the local cart because the API does not save the change permanently.
-
+  // ENHANCEMENT 3:
+  // Adds a product to the cart using the current
+  // authenticated user's ID instead of a hardcoded ID.
   Future<Cart> addToCart({
     required int userId,
     required int productId,
     required int quantity,
   }) async {
+    final String url = '$host/carts/add';
+
     final response = await http.post(
-      Uri.parse('$host/carts/add'),
+      Uri.parse(url),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -62,7 +68,8 @@ class CartService {
       }),
     );
 
-    if (response.statusCode != 200 && response.statusCode != 201) {
+    if (response.statusCode != 200 &&
+        response.statusCode != 201) {
       throw Exception(
         'Failed to add product to cart. '
         'Status: ${response.statusCode}',
