@@ -12,15 +12,10 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-
   provider: ^6.1.5+1
-
   http: ^1.6.0
-
   shared_preferences: ^2.5.5
-
   flutter_screenutil: ^5.9.3
-
   flutter_dotenv: ^6.0.1
 
 dev_dependencies:

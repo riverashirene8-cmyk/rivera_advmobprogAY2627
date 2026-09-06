@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:core';
 
 import 'package:http/http.dart' as http;
 
@@ -6,16 +7,10 @@ import '../constants.dart';
 import '../models/cart.dart';
 
 class CartService {
-  // ENHANCEMENT 3:
-  // Loads the cart using the saved user's ID.
-  // This allows the application to display the cart
-  // belonging to the currently authenticated user.
   Future<Cart?> getCartByUserId(int userId) async {
-    final String url = '$host/carts/user/$userId';
+    final Uri url = Uri.parse('$host/carts/user/$userId');
 
-    final response = await http.get(
-      Uri.parse(url),
-    );
+    final response = await http.get(url);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -24,9 +19,7 @@ class CartService {
     }
 
     final Map<String, dynamic> data =
-        Map<String, dynamic>.from(
-      jsonDecode(response.body),
-    );
+        Map<String, dynamic>.from(jsonDecode(response.body));
 
     final List<dynamic> carts =
         data['carts'] as List<dynamic>? ?? [];
@@ -36,24 +29,19 @@ class CartService {
     }
 
     return Cart.fromJson(
-      Map<String, dynamic>.from(
-        carts.first as Map,
-      ),
+      Map<String, dynamic>.from(carts.first as Map),
     );
   }
 
-  // ENHANCEMENT 3:
-  // Adds a product to the cart using the current
-  // authenticated user's ID instead of a hardcoded ID.
   Future<Cart> addToCart({
     required int userId,
     required int productId,
     required int quantity,
   }) async {
-    final String url = '$host/carts/add';
+    final Uri url = Uri.parse('$host/carts/add');
 
     final response = await http.post(
-      Uri.parse(url),
+      url,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -77,9 +65,7 @@ class CartService {
     }
 
     return Cart.fromJson(
-      Map<String, dynamic>.from(
-        jsonDecode(response.body),
-      ),
+      Map<String, dynamic>.from(jsonDecode(response.body)),
     );
   }
 }
