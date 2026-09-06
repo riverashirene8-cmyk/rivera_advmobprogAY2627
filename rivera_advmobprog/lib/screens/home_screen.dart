@@ -53,10 +53,13 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (_selectedIndex) {
       case 0:
         return 'NU BD Exchange';
+
       case 1:
         return 'My Cart';
+
       case 2:
         return _firstName.isEmpty ? 'Profile' : _firstName;
+
       default:
         return 'NU BD Exchange';
     }
@@ -71,11 +74,14 @@ class _HomeScreenState extends State<HomeScreen> {
       canPop: false,
       child: Scaffold(
         backgroundColor: const Color(0xFFF7F8FC),
+
+        // APP BAR
         appBar: AppBar(
           automaticallyImplyLeading: false,
           elevation: 0,
           backgroundColor: nuBlue,
           titleSpacing: 14.w,
+
           title: Row(
             children: [
               if (showLogo)
@@ -100,7 +106,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-              if (showLogo) SizedBox(width: 10.w),
+
+              if (showLogo)
+                SizedBox(width: 10.w),
+
               Text(
                 _title,
                 style: TextStyle(
@@ -111,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+
           actions: [
             if (_selectedIndex == 0)
               IconButton(
@@ -121,9 +131,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   size: 25.sp,
                 ),
               ),
+
             IconButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/settings');
+                Navigator.pushNamed(
+                  context,
+                  '/settings',
+                );
               },
               icon: Icon(
                 Icons.settings_outlined,
@@ -133,14 +147,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+
+        // PAGE CONTENT
         body: PageView(
           controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
+          physics:
+              const NeverScrollableScrollPhysics(),
+
           children: const [
             ProductScreen(),
             CartScreen(),
             ProfileScreen(),
           ],
+
           onPageChanged: (index) {
             if (!mounted) return;
 
@@ -149,22 +168,36 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           },
         ),
-        floatingActionButton: _selectedIndex == 2
-            ? null
-            : FloatingActionButton(
+
+        // FLOATING MESSAGE BUTTON
+        //
+        // Shop = index 0 -> SHOW
+        // Cart = index 1 -> HIDE
+        // Profile = index 2 -> HIDE
+        floatingActionButton: _selectedIndex == 0
+            ? FloatingActionButton(
                 backgroundColor: nuGold,
                 foregroundColor: nuDarkBlue,
                 elevation: 4,
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(
                     const SnackBar(
-                      content: Text('Chat feature opened'),
+                      content: Text(
+                        'Chat feature opened',
+                      ),
                     ),
                   );
                 },
-                child: const Icon(Icons.chat_outlined),
-              ),
-        bottomNavigationBar: BottomNavigationBar(
+                child: const Icon(
+                  Icons.chat_outlined,
+                ),
+              )
+            : null,
+
+        // BOTTOM NAVIGATION
+        bottomNavigationBar:
+            BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: _onTappedBar,
           type: BottomNavigationBarType.fixed,
@@ -173,20 +206,35 @@ class _HomeScreenState extends State<HomeScreen> {
           unselectedItemColor: Colors.grey,
           selectedFontSize: 11.sp,
           unselectedFontSize: 10.sp,
+
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.storefront_outlined),
-              activeIcon: Icon(Icons.storefront),
+              icon: Icon(
+                Icons.storefront_outlined,
+              ),
+              activeIcon: Icon(
+                Icons.storefront,
+              ),
               label: 'Shop',
             ),
+
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart_outlined),
-              activeIcon: Icon(Icons.shopping_cart),
+              icon: Icon(
+                Icons.shopping_cart_outlined,
+              ),
+              activeIcon: Icon(
+                Icons.shopping_cart,
+              ),
               label: 'Cart',
             ),
+
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
+              icon: Icon(
+                Icons.person_outline,
+              ),
+              activeIcon: Icon(
+                Icons.person,
+              ),
               label: 'Profile',
             ),
           ],
